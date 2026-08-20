@@ -9,10 +9,27 @@ import {
     startCapabilitySession
 } from './capabilities/probe.js';
 
+import {
+    log,
+    explicarErro,
+    renderCapabilities,
+    renderSessionCapabilities
+} from './relatorio.js';
+
+
+// =============================================
+// Elementos onde o relatório é escrito.
+// Existem no index.html — ver <div id="...">.
+// =============================================
+
+const diarioEl = document.getElementById('diario');
+const relatorioEl = document.getElementById('relatorio');
+const sessaoEl = document.getElementById('sessao');
+
 
 async function start() {
 
-    console.log('Iniciando WebXR...');
+    log(diarioEl, 'Iniciando WebXR...');
 
 
     // =============================================
@@ -32,19 +49,14 @@ async function start() {
     // Sonda de capacidades
     // =============================================
 
-    console.log(
-        'Executando sonda de capacidades...'
-    );
+    log(diarioEl, 'Executando sonda de capacidades...');
 
-    const capabilities =
-        await probeCapabilities();
+    const capabilities = await probeCapabilities();
 
-
-    console.log(
-        '=== Capacidades estáticas ==='
-    );
-
-    console.log(capabilities);
+    // Antes só ia pro console. Agora, para além do console (que
+    // continua ativo por causa de log(), lá em relatorio.js), o
+    // resultado aparece escrito na própria página.
+    renderCapabilities(relatorioEl, capabilities);
 
 
     // =============================================
@@ -56,12 +68,9 @@ async function start() {
     // usuário clicar no botão.
     // =============================================
 
-    if (
-        capabilities.sessions.inline.supported
-    ) {
+    if (capabilities.sessions.inline.supported) {
 
-        const button =
-            document.createElement('button');
+        const button = document.createElement('button');
 
         button.textContent =
             'Testar capacidades da sessão WebXR';
@@ -71,7 +80,8 @@ async function start() {
         button.style.right = '20px';
         button.style.zIndex = '9999';
 
-        button.style.padding = '12px 18px';
+        button.style.padding = '16px 24px';
+        button.style.fontSize = '18px';
         button.style.border = 'none';
         button.style.borderRadius = '8px';
 
@@ -80,86 +90,50 @@ async function start() {
         document.body.appendChild(button);
 
 
-        button.addEventListener(
-            'click',
-            async () => {
+        // O teste só pode acontecer uma vez: depois do primeiro clique,
+        // o botão fica desabilitado e não volta a ficar clicável — não
+        // existe reset para "Testar novamente".
+        button.addEventListener('click', async () => {
 
-                button.disabled = true;
+            button.disabled = true;
+            button.textContent = 'Testando...';
 
-                button.textContent =
-                    'Testando...';
+            try {
 
+                log(diarioEl, 'Iniciando sessão inline para diagnóstico...');
 
-                try {
+                const session = await startCapabilitySession('inline');
 
-                    console.log(
-                        'Iniciando sessão inline para diagnóstico...'
-                    );
+                const sessionCapabilities =
+                    await probeActiveSession(session, 'inline');
 
+                renderSessionCapabilities(sessaoEl, sessionCapabilities);
 
-                    const session =
-                        await startCapabilitySession(
-                            'inline'
-                        );
+                await session.end();
 
+                log(diarioEl, 'Sessão de diagnóstico encerrada.');
 
-                    // -------------------------------------
-                    // Consulta da sessão
-                    // -------------------------------------
+                button.textContent = 'Teste concluído';
 
-                    const sessionCapabilities =
-                        await probeActiveSession(
-                            session,
-                            'inline'
-                        );
+            } catch (error) {
 
+                // A falha é resultado, não bug — e precisa ser lida no
+                // próprio aparelho, porque quem está de visor não tem
+                // como abrir o console para ver o erro cru.
+                log(diarioEl, explicarErro(error), 'erro');
 
-                    console.log(
-                        '=== Capacidades da sessão ==='
-                    );
-
-                    console.log(
-                        sessionCapabilities
-                    );
-
-
-                    // -------------------------------------
-                    // Encerramento
-                    // -------------------------------------
-
-                    await session.end();
-
-
-                    console.log(
-                        'Sessão de diagnóstico encerrada.'
-                    );
-
-
-                } catch (error) {
-
-                    console.error(
-                        'Não foi possível iniciar a sessão:',
-                        error
-                    );
-
-
-                } finally {
-
-                    button.disabled = false;
-
-                    button.textContent =
-                        'Testar novamente';
-
-                }
+                button.textContent = 'Teste falhou';
 
             }
-        );
+
+            // Sem "finally" reabilitando o botão: uma vez clicado, ele
+            // permanece desabilitado, sucesso ou falha.
+
+        }, { once: true });
 
     } else {
 
-        console.log(
-            'Sessão inline não suportada.'
-        );
+        log(diarioEl, 'Sessão inline não suportada.', 'alerta');
 
     }
 
@@ -169,18 +143,10 @@ async function start() {
     // =============================================
 
     function animate() {
-
-        renderer.render(
-            scene,
-            camera
-        );
-
+        renderer.render(scene, camera);
     }
 
-
-    renderer.setAnimationLoop(
-        animate
-    );
+    renderer.setAnimationLoop(animate);
 
 }
 
