@@ -1,41 +1,89 @@
 <!doctype html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>WebXR Project</title>
-
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>RebornVirtual — montagem de um computador</title>
     <style>
-        body {
-            margin: 0;
-            font-family: sans-serif;
-            font-size: 18px;
-        }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { height: 100%; overflow: hidden; background: #101015; }
 
-        #relatorio,
-        #sessao,
-        #diario {
-            background: #ffffff;
-            padding: 16px 20px;
-            max-width: 700px;
-        }
+      /* A cena ocupa a tela inteira: no visor e pela câmera ela é o mundo, e no
+         desktop é a janela por onde se olha a bancada. */
+      #cena { position: fixed; inset: 0; }
+      #cena canvas { display: block; }
 
-        #diario {
-            border-top: 1px solid #ddd;
-        }
+      /* O painel é a folha da Seção 3: onde a sonda escreve o que o aparelho
+         concede e onde o diário registra cada resposta. Fica sobreposto num
+         canto, recolhível, para não tapar a bancada. */
+      #painel {
+        position: fixed;
+        top: 12px;
+        left: 12px;
+        width: min(30rem, calc(100vw - 24px));
+        max-height: calc(100vh - 24px);
+        overflow-y: auto;
+        background: rgba(251, 251, 253, 0.94);
+        color: #16161a;
+        border: 1px solid #c9c9d1;
+        border-radius: 10px;
+        padding: 16px 18px;
+        font-family: system-ui, sans-serif;
+        font-size: 0.9rem;
+        line-height: 1.5;
+      }
+      #painel[hidden] { display: none; }
+
+      #painel h1 { font-size: 1.2rem; margin-bottom: 2px; }
+      #painel h2 { font-size: 1rem; margin-top: 1.2rem; }
+      #painel h3 { font-size: 0.9rem; margin-top: 0.9rem; color: #3a3a52; }
+      #painel p  { margin: 4px 0; }
+      #painel .legenda { color: #55555f; font-size: 0.82rem; }
+
+      table { border-collapse: collapse; width: 100%; font-size: 0.8rem; margin-top: 6px; }
+      th, td { border: 1px solid #c9c9d1; padding: 5px 7px; text-align: left; vertical-align: top; }
+      th { background: #ecedf2; }
+
+      /* Botões grandes: no visor a mira é um raio de controle a um metro, e alvo
+         pequeno vira exercício de pontaria. */
+      button {
+        font-size: 1rem; padding: 12px 18px; margin: 8px 8px 0 0;
+        border: 1px solid #3a3a52; border-radius: 8px;
+        background: #3a3a52; color: #fff; cursor: pointer;
+      }
+      button:disabled { background: #b7b7c2; border-color: #b7b7c2; cursor: not-allowed; }
+
+      /* O diário é o canal de erro deste ambiente: quem está de visor não abre
+         console de depuração, e mensagem que só existe lá não existe. */
+      .diario { margin: 4px 0; padding: 7px 9px; border-left: 4px solid #9a9ab0; border-radius: 4px; }
+      .diario-alerta { border-left-color: #b8860b; background: #fdf6e3; }
+      .diario-falha  { border-left-color: #a02c2c; background: #fdecec; }
+
+      /* O botão de recolher o painel vive fora dele, sempre visível. */
+      #recolher {
+        position: fixed; top: 12px; right: 12px; z-index: 10;
+        font-size: 0.85rem; padding: 8px 12px;
+      }
     </style>
-</head>
+  </head>
+  <body>
+    <div id="cena"></div>
 
-<body>
-    <div id="relatorio"></div>
-    <div id="sessao"></div>
-    <div id="diario"></div>
+    <button id="recolher" type="button">Recolher o painel</button>
 
-    <script type="module" src="/src/main.js"></script>
-</body>
+    <div id="painel">
+      <h1>RebornVirtual</h1>
+      <p class="legenda">Montagem de um computador — a mesma bancada na tela, no visor e pela câmera.</p>
+
+      <div id="acoes"></div>
+
+      <div id="relatorio"></div>
+      <div id="sonda"></div>
+
+      <h2>Diário</h2>
+      <div id="diario"></div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
 </html>
