@@ -26,6 +26,8 @@ export class Oficina {
   readonly camera: THREE.PerspectiveCamera;
   /** O que se ancora no mundo real pela câmera: bancada, gabinete e peças. */
   readonly raiz = new THREE.Group();
+  /** O gabinete, exposto como nó: as peças travadas passam a pertencer a ele. */
+  readonly gabinete = new THREE.Group();
   /** Chão e parede decorativos — o "Ambiente" da Seção 3, oculto em AR. */
   readonly ambiente = new THREE.Group();
   /** As peças que a mira pode apontar e apanhar. */
@@ -115,30 +117,32 @@ export class Oficina {
       metalness: 0.6,
       side: THREE.DoubleSide,
     });
-    const grupo = new THREE.Group();
+    this.gabinete.name = 'gabinete';
     const { largura, altura, profundidade, parede } = GABINETE;
 
     // Fundo (a bandeja onde a placa-mãe assenta).
     const fundo = new THREE.Mesh(new THREE.BoxGeometry(largura, parede, profundidade), metal);
     fundo.position.set(0, parede / 2, 0);
-    grupo.add(fundo);
+    this.gabinete.add(fundo);
 
     // Três paredes baixas; a de cima (voltada a quem monta) fica aberta, porque
     // o gabinete está "deitado e com a tampa removida" (Seção 3).
     const traseira = new THREE.Mesh(new THREE.BoxGeometry(largura, altura, parede), metal);
     traseira.position.set(0, altura / 2, -profundidade / 2 + parede / 2);
-    grupo.add(traseira);
+    this.gabinete.add(traseira);
 
     const lateral = new THREE.BoxGeometry(parede, altura, profundidade);
     const esquerda = new THREE.Mesh(lateral, metal);
     esquerda.position.set(-largura / 2 + parede / 2, altura / 2, 0);
-    grupo.add(esquerda);
+    this.gabinete.add(esquerda);
     const direita = new THREE.Mesh(lateral, metal);
     direita.position.set(largura / 2 - parede / 2, altura / 2, 0);
-    grupo.add(direita);
+    this.gabinete.add(direita);
 
-    grupo.position.set(0, ALTURA_DO_TAMPO, 0);
-    this.raiz.add(grupo);
+    // O gabinete assenta no tampo; como ele fica na origem XZ da raiz, a posição
+    // de trava das peças (definida em encaixe.ts) já cai dentro dele.
+    this.gabinete.position.set(0, ALTURA_DO_TAMPO, 0);
+    this.raiz.add(this.gabinete);
   }
 
   private montarPecas(): void {

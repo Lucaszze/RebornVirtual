@@ -21,6 +21,12 @@ export const ALTURA_DO_TAMPO = 0.95;
 
 export interface PecaDef {
   readonly id: string;
+  /**
+   * A que família a peça pertence. Os dois pentes são idênticos (Seção 3), então
+   * compartilham a categoria `pente` e qualquer um serve nos dois encaixes de
+   * memória. Para as demais, a categoria coincide com o id.
+   */
+  readonly categoria: string;
   readonly nome: string;
   /** Dimensões [largura, altura, profundidade] em metros. */
   readonly tamanho: readonly [number, number, number];
@@ -40,6 +46,7 @@ export interface PecaDef {
 export const PECAS: readonly PecaDef[] = [
   {
     id: 'placa-mae',
+    categoria: 'placa-mae',
     nome: 'Placa-mãe',
     tamanho: [0.305, 0.004, 0.244], // ATX 30,5 × 24,4 cm
     cor: 0x2f7d4f,
@@ -49,6 +56,7 @@ export const PECAS: readonly PecaDef[] = [
   },
   {
     id: 'pente-1',
+    categoria: 'pente',
     nome: 'Pente de memória',
     tamanho: [0.133, 0.008, 0.031], // 13,3 × 3,1 × 0,8 cm
     cor: 0x2b3a67,
@@ -58,6 +66,7 @@ export const PECAS: readonly PecaDef[] = [
   },
   {
     id: 'pente-2',
+    categoria: 'pente',
     nome: 'Pente de memória',
     tamanho: [0.133, 0.008, 0.031],
     cor: 0x2b3a67,
@@ -67,6 +76,7 @@ export const PECAS: readonly PecaDef[] = [
   },
   {
     id: 'dissipador',
+    categoria: 'dissipador',
     nome: 'Dissipador',
     tamanho: [0.12, 0.08, 0.1], // 12 × 10 × 8 cm (altura das aletas para cima)
     cor: 0x9aa0a6,
@@ -76,6 +86,7 @@ export const PECAS: readonly PecaDef[] = [
   },
   {
     id: 'fonte',
+    categoria: 'fonte',
     nome: 'Fonte',
     tamanho: [0.15, 0.086, 0.14], // 15 × 14 × 8,6 cm
     cor: 0x3a3a42,
@@ -85,6 +96,7 @@ export const PECAS: readonly PecaDef[] = [
   },
   {
     id: 'ssd',
+    categoria: 'ssd',
     nome: 'SSD M.2',
     tamanho: [0.08, 0.003, 0.022], // 2280: 8,0 × 2,2 cm
     cor: 0xb08d57,
@@ -128,7 +140,11 @@ export function criarMalhaDaPeca(def: PecaDef): THREE.Mesh {
   }
 
   malha.userData.id = def.id;
+  malha.userData.categoria = def.categoria;
   malha.userData.nome = def.nome;
+  malha.userData.tamanho = def.tamanho;
   malha.userData.origem = malha.position.clone();
+  malha.userData.origemGiroY = malha.rotation.y;
+  malha.userData.travada = false;
   return malha;
 }

@@ -73,5 +73,19 @@ src/
   e as seis peças, em escala real, visíveis na tela, no visor e ancoradas por AR.
 
 Os quatro modelos de forma complexa (gabinete, placa-mãe, dissipador, fonte)
-entram por ora como caixas dimensionadas corretamente; serão trocados por glTF
-importado quando a tabela de ativos da Seção 12 estiver fechada.
+entram como caixas dimensionadas corretamente, porque o Módulo 03 pede geometria
+crua construída por código; serão trocados por glTF importado no módulo de ativos
+externos (decisão registrada na Seção 14 da especificação).
+
+## Aparelhos testados
+
+Em que aparelhos o ambiente já foi visto funcionando, conforme o relatório da
+própria página (a sonda de capacidades). Quem testar em outro aparelho acrescenta
+uma linha.
+
+| Aparelho | Regime que abriu | O que não abriu |
+|---|---|---|
+| PC Dell Inspiron 15 3520 (i5-1135G7, Iris Xe), Windows 11, Brave | Na tela: cena, manipulação, encaixe e painel de custo (120 qps, 8,3 ms, 220 triângulos) | No visor e pela câmera: o aparelho não declara sessão imersiva |
+| Celular Android, Chrome, aberto pelo túnel HTTPS | Na tela, e a sessão pela câmera (composição alpha-blend confirmada; local-floor, unbounded, hit-test, anchors e plane-detection concedidos) | bounded-floor, dom-overlay e hand-tracking não concedidos; a sonda classificou o celular como visor, erro conhecido em `src/sonda/graus.ts` |
+
+Medições de desempenho, com máquina e data: Seção 10 da especificação.

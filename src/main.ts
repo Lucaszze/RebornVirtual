@@ -13,6 +13,9 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 import { Oficina } from './cena/oficina';
+import { Encaixe } from './cena/encaixe';
+import { PainelDeCusto } from './cena/custo';
+import { setupManipulacao, type TipoDeResposta } from './tela/manipulacao';
 import { setupControles } from './xr/controles';
 import { setupAr } from './xr/ar';
 import { criarContexto } from './xr/contexto';
@@ -37,6 +40,7 @@ function exigirElemento(id: string): HTMLElement {
 
 const cenaEl = exigirElemento('cena');
 const acoesEl = exigirElemento('acoes');
+const mensagemEl = exigirElemento('mensagem');
 const relatorioEl = exigirElemento('relatorio');
 const sondaEl = exigirElemento('sonda');
 const diarioEl = exigirElemento('diario');
@@ -69,10 +73,49 @@ const contexto = criarContexto();
 const controles = setupControles(
   renderer,
   oficina.scene,
+  oficina.raiz,
   oficina.interactive,
   () => contexto.modo !== 'camera' || contexto.arPousada,
 );
 const ancoragem = setupAr(renderer, oficina.scene, oficina.raiz, contexto);
+
+// Painel de custo do quadro, preso à bancada (passo 9 / Seção 10).
+const painelDeCusto = new PainelDeCusto(renderer);
+oficina.raiz.add(painelDeCusto.mesh);
+
+// ---------------------------------------------------------------------------
+// Encaixe e manipulação na tela (Bloco 3). O veredito de cada soltar vai para o
+// painel de mensagens em letra grande e para o diário.
+// ---------------------------------------------------------------------------
+const encaixe = new Encaixe();
+
+function responder(texto: string, tipo: TipoDeResposta): void {
+  mensagemEl.textContent = texto;
+  mensagemEl.className = tipo;
+  if (tipo === 'recusa') {
+    diario.alerta(texto);
+  } else {
+    diario.nota(texto);
+  }
+}
+
+const manipulacao = setupManipulacao({
+  dom: renderer.domElement,
+  camera: oficina.camera,
+  raiz: oficina.raiz,
+  gabinete: oficina.gabinete,
+  interactive: oficina.interactive,
+  encaixe,
+  orbit,
+  ativo: () => !renderer.xr.isPresenting,
+  aoResponder: responder,
+  aoRegistrar: (texto) => diario.nota(texto),
+});
+
+diario.nota(
+  'Na tela: passe o cursor sobre uma peça para mirá-la, clique para apanhar, gire com Q/E (vertical) ' +
+    'e R/F (lateral) e clique de novo para soltar. Arrastar gira a câmera. A placa-mãe entra primeiro.',
+);
 
 // ---------------------------------------------------------------------------
 // Botões de sessão: só habilitados quando o aparelho confirma o suporte
@@ -270,11 +313,14 @@ renderer.setAnimationLoop((_tempo, frame) => {
     orbit.update();
   }
   oficina.update(delta);
+  manipulacao.update(delta);
   controles.update();
   if (frame) {
     ancoragem.update(frame);
   }
   renderer.render(oficina.scene, oficina.camera);
+  // Depois do render: renderer.info já reflete o quadro recém-desenhado.
+  painelDeCusto.registrar(delta);
 });
 
 // ---------------------------------------------------------------------------

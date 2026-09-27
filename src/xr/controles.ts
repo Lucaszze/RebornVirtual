@@ -22,6 +22,7 @@ export interface Controles {
 export function setupControles(
   renderer: THREE.WebGLRenderer,
   scene: THREE.Scene,
+  raiz: THREE.Group,
   interactive: THREE.Object3D[],
   podeApanhar: () => boolean,
 ): Controles {
@@ -80,7 +81,10 @@ export function setupControles(
   function onSelectEnd(controller: THREE.XRTargetRaySpace): void {
     const obj = selected.get(controller);
     if (obj) {
-      scene.attach(obj); // solta de volta na cena, mantendo a posição no mundo
+      // Devolve a peça à BANCADA (raiz), não à cena: assim ela continua
+      // pertencendo ao conjunto ancorado no AR, em vez de virar um objeto solto
+      // no mundo. .attach mantém a posição no mundo ao trocar de pai.
+      raiz.attach(obj);
       selected.delete(controller);
     }
   }

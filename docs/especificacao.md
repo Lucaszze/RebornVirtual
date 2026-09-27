@@ -33,18 +33,18 @@ O que a câmera precisa provar contra uma mesa de verdade: que o gabinete fica p
 | Objeto | Quantos | Origem | Move? | Observação |
 |---|---|---|---|---|
 | Bancada | 1 | construída por código | não | apoio fixo da cena; 1,60 × 0,80 m |
-| Gabinete aberto | 1 | modelo importado (glTF) | não | deitado, tampa removida, fixo sobre a bancada |
-| Placa-mãe | 1 | modelo importado (glTF) | sim, apanhada pela pessoa | base dos demais encaixes; primeira da ordem |
+| Gabinete aberto | 1 | construído por código (caixa em escala real); glTF adiado | não | deitado, tampa removida, fixo sobre a bancada |
+| Placa-mãe | 1 | construído por código (caixa em escala real); glTF adiado | sim, apanhada pela pessoa | base dos demais encaixes; primeira da ordem |
 | Pente de memória | 2 | construído por código | sim, apanhado pela pessoa | idênticos; o entalhe assimétrico precisa sair exato |
-| Dissipador | 1 | modelo importado (glTF) | sim, apanhado pela pessoa | só encaixa depois dos dois pentes |
-| Fonte | 1 | modelo importado (glTF) | sim, apanhada pela pessoa | sentido único: ventoinha voltada para a grade |
+| Dissipador | 1 | construído por código (caixa em escala real); glTF adiado | sim, apanhado pela pessoa | só encaixa depois dos dois pentes |
+| Fonte | 1 | construído por código (caixa em escala real); glTF adiado | sim, apanhada pela pessoa | sentido único: ventoinha voltada para a grade |
 | SSD (M.2) | 1 | construído por código | sim, apanhado pela pessoa | menor peça da cena; entalhe no conector |
 | Painel de mensagens | 1 | construído por código | não | placa fixa atrás da bancada onde as recusas aparecem em letra grande |
 | Ambiente (chão + parede) | 1 | construído por código | não | mínimo; é o primeiro a sair na degradação |
 
 Total: 9 tipos e 10 objetos em cena (o pente repete). A cena tem poucos objetos de propósito. O esforço do projeto está na precisão do encaixe, não na quantidade.
 
-A mistura de origens é proposital e atende ao que a disciplina cobra. Os quatro modelos de forma complexa (gabinete, placa-mãe, dissipador e fonte) vêm importados de arquivos de terceiros. Bancada, painel, ambiente, pentes e SSD são construídos por código. Pentes e SSD ficaram no grupo do código de propósito: o entalhe deles é regra de jogo e precisa sair geometricamente exato.
+No Módulo 03 todos os objetos são construídos por código, em formas primitivas e na escala da Seção 4, como o módulo exige. Os quatro de forma complexa (gabinete, placa-mãe, dissipador e fonte) estavam previstos como modelos importados de terceiros e passarão a sê-lo no módulo de ativos externos; até lá são caixas nas dimensões reais (decisão registrada na Seção 14). Pentes e SSD ficaram no grupo do código de propósito: o entalhe deles é regra de jogo e precisa sair geometricamente exato.
 
 ### Seção 4. O espaço e as escalas
 
@@ -147,15 +147,23 @@ O regime de tela garante que o trabalho avance mesmo quando o visor está com ou
 
 - Objetos em cena: 10, de 9 tipos. A única repetição é o pente, e é repetição barata: os dois compartilham geometria e material, uma malha só na memória.
 - Meta de fluidez: 72 quadros por segundo no visor (tempo de quadro de até 13,9 ms), porque travamento dentro do visor causa mal-estar físico, e 60 qps na tela e pela câmera.
-- Orçamento de geometria: até 150 mil triângulos na cena inteira. Cada modelo importado entra com até 30 mil triângulos; acima disso é simplificado ou trocado antes de entrar.
+- Orçamento de geometria: até 150 mil triângulos na cena inteira. Cada modelo importado, quando os modelos entrarem no módulo de ativos externos, fica com até 30 mil triângulos; acima disso é simplificado ou trocado antes de entrar. Hoje, só com formas primitivas, a cena inteira desenha 220 triângulos.
 - Chamadas de desenho: até 50. Texturas: até 2048 × 2048, e até 1024 nas peças pequenas.
+
+Medição real, lida no painel de custo preso à bancada (o indicador de custo do quadro que fica dentro da cena). O número vale para a máquina e o instante anotados na linha; cada integrante que rodar em máquina diferente acrescenta a sua.
+
+| Máquina | Navegador | Regime | Quadros por segundo | Tempo de quadro | Triângulos | Chamadas de desenho | Data |
+|---|---|---|---|---|---|---|---|
+| Dell Inspiron 15 3520 (Intel Core i5-1135G7, Iris Xe, 16 GB), tela 1920 × 1080 a 120 Hz | Brave | tela | 120 | 8,3 ms | 220 | 21 | 25/09/2026 |
+
+A medição de 25/09/2026 ficou presa em 120 quadros por segundo porque o navegador sincroniza o desenho com a taxa do monitor (120 Hz). Os 8,3 ms são, portanto, o teto imposto pela tela, e não o custo da cena: o custo real é menor e fica abaixo dos tetos declarados acima (13,9 ms no visor, 16,7 ms na tela). Num monitor de 60 Hz o painel mostraria 60 qps e 16,7 ms, e a cena se comportaria igual, porque o laço avança pelo tempo transcorrido e não pela contagem de quadros.
 
 A ordem de degradação fica decidida agora, com calma, e não depois, com a cena travando:
 
 1. Saem as sombras dinâmicas; ficam sombras fixas simples sob as peças.
 2. As texturas caem de 2048 para 1024.
 3. Sai o ambiente (parede e chão decorativos); ficam bancada, gabinete e peças.
-4. Os modelos importados são simplificados, sempre preservando a silhueta e os entalhes. O entalhe é regra de jogo, não enfeite, e não sai em nenhum nível de degradação.
+4. Os modelos importados (quando existirem) são simplificados, sempre preservando a silhueta e os entalhes. O entalhe é regra de jogo, não enfeite, e não sai em nenhum nível de degradação.
 
 ### Seção 11. Erros, limites e degradação
 
@@ -176,17 +184,17 @@ Regra do grupo: nenhum ativo entra no repositório sem a linha desta tabela pree
 |---|---|---|---|
 | `bancada`, `painel`, `ambiente` (geometria por código) | construídos pelo grupo em Three.js | a do repositório | não se aplica |
 | `pente-memoria`, `ssd-m2` (geometria por código, entalhe exato) | construídos pelo grupo em Three.js | a do repositório | não se aplica |
-| `gabinete.glb` | Sketchfab, busca com filtro de licença | exigida: CC0 ou CC-BY, com atribuição registrada aqui | a preencher na escolha, no Bloco 2 |
-| `placa-mae.glb` | Sketchfab, busca com filtro de licença | exigida: CC0 ou CC-BY | a preencher na escolha, no Bloco 2 |
-| `dissipador.glb` | Sketchfab, busca com filtro de licença | exigida: CC0 ou CC-BY | a preencher na escolha, no Bloco 2 |
-| `fonte.glb` | Sketchfab, busca com filtro de licença | exigida: CC0 ou CC-BY | a preencher na escolha, no Bloco 2 |
+| `gabinete.glb` | Sketchfab, busca com filtro de licença | exigida: CC0 ou CC-BY, com atribuição registrada aqui | adiado para o módulo de ativos externos |
+| `placa-mae.glb` | Sketchfab, busca com filtro de licença | exigida: CC0 ou CC-BY | adiado para o módulo de ativos externos |
+| `dissipador.glb` | Sketchfab, busca com filtro de licença | exigida: CC0 ou CC-BY | adiado para o módulo de ativos externos |
+| `fonte.glb` | Sketchfab, busca com filtro de licença | exigida: CC0 ou CC-BY | adiado para o módulo de ativos externos |
 | Sons de interface (estalo, três recusas, acorde de ligar) | pacotes de áudio da Kenney (kenney.nl) | CC0 | pacote exato a fixar no Bloco 2 |
 
-Os modelos importados entram em glTF/GLB, o formato nativo do carregador do Three.js.
+Os modelos importados entram em glTF/GLB, o formato nativo do carregador do Three.js, no módulo de ativos externos. No Módulo 03 nenhum ativo externo está no repositório: as quatro linhas `.glb` acima são o plano, não o estado atual.
 
-Sobre o caso frequente que a disciplina nomeia: nenhum objeto de demonstração que acompanha ferramenta ou biblioteca será publicado como cena própria. O uso até seria permitido, mas não contaria como composição de cena. Aqui a composição vem dos quatro modelos importados da tabela mais os objetos construídos por código.
+Sobre o caso frequente que a disciplina nomeia: nenhum objeto de demonstração que acompanha ferramenta ou biblioteca será publicado como cena própria. O uso até seria permitido, mas não contaria como composição de cena. No Módulo 03 a composição vem só dos objetos construídos por código; a partir do módulo de ativos externos, dos quatro modelos importados da tabela mais esses objetos.
 
-Os endereços pendentes são decisão em aberto, declarada na Seção 14 com prazo: fecham no Bloco 2, antes de qualquer ativo entrar no repositório.
+Os endereços pendentes são decisão em aberto, declarada na Seção 14 com prazo: fecham no módulo de ativos externos, antes de qualquer ativo entrar no repositório.
 
 ### Seção 13. Plano de construção por blocos
 
@@ -208,7 +216,7 @@ Riscos, com resposta e prazo:
 | O que preocupa | O que será feito | Quando |
 |---|---|---|
 | As folgas caírem em "salta sozinho" ou em "tortura de precisão" | protocolo da Seção 7: 3 pessoas por regime, com registro de cada valor tentado e do sintoma | Bloco 5 |
-| Modelos importados estourarem o orçamento de geometria | limite de 30 mil triângulos conferido na entrada; simplificar ou trocar antes de commitar | Bloco 2 |
+| Modelos importados estourarem o orçamento de geometria | limite de 30 mil triângulos conferido na entrada; simplificar ou trocar antes de commitar | módulo de ativos externos |
 | O visor ser compartilhado entre os grupos e virar gargalo | a tela é o caso base e toda regra nasce e fecha nela (Blocos 3 e 4); as sessões de visor ficam agendadas em lote | Blocos 2 a 5 |
 | Âncora instável em mesa lisa ou reflexiva no regime de câmera | testar em 3 mesas diferentes; se falhar, oferecer posicionamento manual por toque | Bloco 5 |
 | A Regra de Ouro frustrar demais quem nunca viu um computador aberto | medir no teste o tempo até a primeira peça travada; acima de 3 minutos, melhorar a redação das recusas, nunca adicionar dica | Bloco 5 |
@@ -218,7 +226,13 @@ Decisões em aberto, e como cada uma será tomada:
 - Valores finais das folgas de posição e ângulo: saem de medição, pelo protocolo da Seção 7 (Bloco 5).
 - Escala padrão pela câmera, 1:2 ou 1:1: sai de teste em mesas reais de tamanhos comuns (Bloco 5).
 - Dissipador com uma ou duas orientações válidas: o grupo confere o suporte do componente real de referência antes de codificar a regra (até o Bloco 3).
-- Endereço e licença finais dos quatro modelos importados: pesquisa com filtro de licença, fechada no Bloco 2, antes do primeiro commit de ativo.
+- Endereço e licença finais dos quatro modelos importados: pesquisa com filtro de licença, fechada no módulo de ativos externos, antes do primeiro commit de ativo.
+
+Decisões que mudaram desde o Módulo 01, com o motivo:
+
+| Decisão no Módulo 01 | Decisão atual | Motivo |
+|---|---|---|
+| Gabinete, placa-mãe, dissipador e fonte entram como modelos glTF importados de terceiros (Sketchfab), já no Bloco 2 | Os quatro entram como formas primitivas construídas por código, na escala da Seção 4; os glTF ficam para o módulo de ativos externos | O Módulo 03 exige geometria crua, sem nada importado nem texturizado: o que ele cobra é a estrutura da cena (árvore, troca de pai, laço contra o relógio), e peças importadas esconderiam essa estrutura e gastariam o tempo dela. Escala correta vem antes de aparência. |
 
 Declaração de uso de inteligência artificial: a estrutura e a primeira redação desta especificação foram feitas com apoio de IA (Claude), a partir de dois insumos escritos pelo grupo, as regras da cena escolhida e o texto-guia da disciplina. O assistente também leu o repositório do grupo, para que o plano partisse do código que já existe (a sonda de capacidades citada nas Seções 11 e 13). Antes de considerar o documento fechado, o grupo confere as medidas da Seção 4 contra as dimensões reais dos componentes (padrões ATX, DDR4 e M.2 2280), as precedências da Seção 6 contra a prática real de montagem e os números da Seção 10 contra o aparelho disponível. Cada integrante revisa e assina ao menos uma seção em commit próprio; nenhuma linha permanece aqui sem que alguém do grupo saiba explicá-la.
 
